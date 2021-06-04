@@ -33,6 +33,20 @@ class HashYearDataFrame(BaseModel):
 
 
 def load_mongo_client(mongo_username: str, mongo_password: str) -> pymongo.MongoClient:
+    """Loads MongoDB's client from Mongo credentials
+
+    Parameters
+    ----------
+    mongo_username : str
+        MongoDB's database username
+    mongo_password : str
+        MongoDB's database password
+
+    Returns
+    -------
+    pymongo.MongoClient
+        Database client of MongoDB
+    """
     mongo_uri = f"mongodb+srv://{mongo_username}:{mongo_password}@maincluster.otbuf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
     client = pymongo.MongoClient(mongo_uri)
     return client
@@ -141,6 +155,17 @@ def get_neurips_hashs(save_file: Optional[Path] = None) -> pd.DataFrame:
 def save_neurips_metadata(
     mongo_username: str, mongo_password: str, hash_csv: Optional[Path] = None
 ) -> None:
+    """[summary]
+
+    Parameters
+    ----------
+    mongo_username : str
+        [description]
+    mongo_password : str
+        [description]
+    hash_csv : Optional[Path], optional
+        [description], by default None
+    """
     if hash_csv:
         try:
             year_hash = pd.read_csv(hash_csv)
