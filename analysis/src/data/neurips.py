@@ -52,7 +52,7 @@ def load_mongo_client(mongo_username: str, mongo_password: str) -> pymongo.Mongo
     return client
 
 
-def extract_ml4physics() -> pd.DataFrame:
+def extract_ml4physics(save_file: Optional[Path] = None) -> pd.DataFrame:
     """Takes the information on the official website of `https://ml4physicalsciences.github.io/` and
     produces a dataframe with the title and the authors as columns
 
@@ -73,10 +73,19 @@ def extract_ml4physics() -> pd.DataFrame:
                     title, *_, authors = re.split(r"\[(pdf|poster|video)\]", el.text.strip())
                     data.title.append(title.strip())
                     data.authors.append(authors.strip())
-    return pd.DataFrame(data.dict())
+    df = pd.DataFrame(data.dict())
+    if save_file:
+        df.to_csv(save_file, index=None)
+    return df
 
 
-def post_ml4physics_info(mongo_username: str, mongo_password: str, core_api_key: str) -> None:
+def post_ml4physics_info(
+    mongo_username: str,
+    mongo_password: str,
+    core_api_key: str,
+    mongo_database: str = "neurips",
+    mongo_collection: str = "ml4physics",
+) -> None:
     """Takes information from the ML4Physics table and transfers it to a MongoDB cluster.
     The extra information will be read thanks to CORE's API for extracting information on
     science papers. More information can be found here: `https://core.ac.uk/`.
@@ -84,16 +93,25 @@ def post_ml4physics_info(mongo_username: str, mongo_password: str, core_api_key:
     Parameters
     ----------
     mongo_username : str
-        Your MongoDB username
+        [description]
     mongo_password : str
-        Your MongoDB password
+        [description]
     core_api_key : str
-        The API key from CORE V2's api
+        [description]
+    mongo_database : str, optional
+        [description], by default "neurips"
+    mongo_collection : str, optional
+        [description], by default "ml4physics"
+
+    Raises
+    ------
+    Exception
+        [description]
     """
     client = load_mongo_client(mongo_username, mongo_password)
     q_params = {"apiKey": core_api_key}
-    db = client.neurips
-    collection = db.ml4physics
+    db = client[mongo_database]
+    collection = db[mongo_collection]
     df = extract_ml4physics()
     for index, row in df.iterrows():
         # Fix timer at 2 to avoid code 429
@@ -153,7 +171,11 @@ def get_neurips_hashs(save_file: Optional[Path] = None) -> pd.DataFrame:
 
 
 def save_neurips_metadata(
-    mongo_username: str, mongo_password: str, hash_csv: Optional[Path] = None
+    mongo_username: str,
+    mongo_password: str,
+    hash_csv: Optional[Path] = None,
+    mongo_database: str = "neurips",
+    mongo_collection: str = "neurips_metadata",
 ) -> None:
     """[summary]
 
@@ -165,6 +187,10 @@ def save_neurips_metadata(
         [description]
     hash_csv : Optional[Path], optional
         [description], by default None
+    mongo_database : str, optional
+        [description], by default "neurips"
+    mongo_collection : str, optional
+        [description], by default "neurips_metadata"
     """
     if hash_csv:
         try:
@@ -175,8 +201,8 @@ def save_neurips_metadata(
     else:
         year_hash = get_neurips_hashs()
     client = load_mongo_client(mongo_username, mongo_password)
-    db = client.neurips
-    collection = db.neurips_metadata
+    db = client[mongo_database]
+    collection = db[mongo_collection]
 
     for i, row in year_hash.iterrows():
         json_url = f"https://papers.nips.cc/paper/{row.year}/file/{row.hash}-Metadata.json"

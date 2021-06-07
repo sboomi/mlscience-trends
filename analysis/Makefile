@@ -80,7 +80,8 @@ test_environment:
 # PROJECT RULES                                                                 #
 #################################################################################
 
-
+test_functions:
+	pytest tests/ --basetemp=data/interim/pytests
 
 #################################################################################
 # Self Documenting Commands                                                     #
