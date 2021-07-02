@@ -1,8 +1,15 @@
-FROM python:3.9-alpine
-EXPOSE 8000
-WORKDIR /backend
-COPY requirements.txt /backend
-RUN pip3 install -r requirements.txt --no-cache-dir
-COPY . /backend
-ENTRYPOINT ["python3"]
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+FROM python:3.9.5-slim-buster
+
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY . .
+
+RUN chmod +x entrypoint.sh
+
+CMD entrypoint.sh

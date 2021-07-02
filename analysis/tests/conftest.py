@@ -12,5 +12,5 @@ def execute_before_any_test():
     client = neurips.load_mongo_client(mongo_username, mongo_password)
     db = client["test_neurips"]
     for collection in db.list_collection_names():
-        db["collection"].drop()
+        db[collection].drop()
     client.close()

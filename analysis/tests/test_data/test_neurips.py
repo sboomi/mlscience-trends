@@ -31,13 +31,10 @@ def test_extract_ml4physics():
 
 
 def text_extract_ml4physics_with_save_file(tmp_path):
-    directory = tmp_path / "ml4physics"
-    directory.mkdir()
-    df = neurips.extract_ml4physics(directory / "ml4physics.csv")
+    df = neurips.extract_ml4physics(tmp_path / "ml4physics.csv")
     assert len(list(tmp_path.iterdir())) == 1
-    assert len(list(directory.iterdir())) == 1
-    assert list(directory.iterdir())[0].name == "ml4physics.csv"
-    open_df = pd.read_csv(directory / "ml4physics.csv")
+    assert list(tmp_path.iterdir())[0].name == "ml4physics.csv"
+    open_df = pd.read_csv(tmp_path / "ml4physics.csv")
     assert all(open_df.columns == ["title", "authors"])
 
 
@@ -47,11 +44,7 @@ def test_post_ml4physics_info():
     mongo_password = os.environ.get("MONGO_DB_PASSWORD")
     core_api_key = os.environ.get("CORE_API_KEY")
     neurips.post_ml4physics_info(
-        mongo_username,
-        mongo_password,
-        core_api_key,
-        mongo_database="test_neurips",
-        mongo_collection="test_ml4physics",
+        mongo_username, mongo_password, core_api_key, mongo_database="test_neurips", mongo_collection="test_ml4physics",
     )
     client = neurips.load_mongo_client(mongo_username, mongo_password)
     df = neurips.extract_ml4physics()
@@ -81,13 +74,10 @@ def test_get_neurips_hashs():
 
 
 def text_get_neurips_hashs(tmp_path):
-    directory = tmp_path / "neurips_metadata"
-    directory.mkdir()
-    df = neurips.get_neurips_hashs(directory / "neurips_metadata.csv")
+    df = neurips.get_neurips_hashs(tmp_path / "neurips_metadata.csv")
     assert len(list(tmp_path.iterdir())) == 1
-    assert len(list(directory.iterdir())) == 1
-    assert list(directory.iterdir())[0].name == "neurips_metadata.csv"
-    open_df = pd.read_csv(directory / "neurips_metadata.csv")
+    assert list(tmp_path.iterdir())[0].name == "neurips_metadata.csv"
+    open_df = pd.read_csv(tmp_path / "neurips_metadata.csv")
     assert all(open_df.columns == ["hash", "year"])
 
 
@@ -96,10 +86,7 @@ def test_save_neurips_metadata():
     mongo_username = os.environ.get("MONGO_DB_USERNAME")
     mongo_password = os.environ.get("MONGO_DB_PASSWORD")
     neurips.save_neurips_metadata(
-        mongo_username,
-        mongo_password,
-        mongo_database="test_neurips",
-        mongo_collection="test_metadata",
+        mongo_username, mongo_password, mongo_database="test_neurips", mongo_collection="test_metadata",
     )
     client = neurips.load_mongo_client(mongo_username, mongo_password)
     total_count = client["test_neurips"]["test_metadata"].count_documents({})
@@ -111,9 +98,7 @@ def test_save_neurips_metadata_with_hash_csv(tmp_path):
     load_dotenv(find_dotenv())
     mongo_username = os.environ.get("MONGO_DB_USERNAME")
     mongo_password = os.environ.get("MONGO_DB_PASSWORD")
-    directory = tmp_path / "neurips_metadata"
-    directory.mkdir()
-    hash_csv = directory / "neurips_metadata.csv"
+    hash_csv = tmp_path / "neurips_metadata.csv"
 
     neurips.save_neurips_metadata(
         mongo_username,
@@ -132,9 +117,7 @@ def test_save_neurips_metadata_wrong_hash_csv(tmp_path):
     load_dotenv(find_dotenv())
     mongo_username = os.environ.get("MONGO_DB_USERNAME")
     mongo_password = os.environ.get("MONGO_DB_PASSWORD")
-    directory = tmp_path / "neurips_metadata"
-    directory.mkdir()
-    hash_csv = directory / "neurips_metadata.csv"
+    hash_csv = tmp_path / "neurips_metadata.csv"
     with pytest.raises(FileNotFoundError):
         neurips.save_neurips_metadata(
             mongo_username,
